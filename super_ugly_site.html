@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>!!! МОЙ СУПЕР-САЙТ 2004 !!!</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; min-height:100%; }
+  body {
+    font-family: Arial, Helvetica, sans-serif; font-style: normal;
+    color: #00ff00;
+    background:
+      repeating-linear-gradient(45deg, #ff00ff 0 12px, #00ffff 12px 24px),
+      #ff00ff;
+    cursor: crosshair;
+    overflow-x: hidden;
+  }
+  .warning {
+    background: yellow;
+    color: red;
+    border: 8px ridge red;
+    padding: 10px;
+    font-size: 28px;
+    text-align:center;
+    animation: blink .35s steps(2,end) infinite;
+  }
+  @keyframes blink { 50% { opacity: .05; } }
+  .wrap {
+    width: 94%;
+    max-width: 1050px;
+    margin: 12px auto;
+    background: #000080;
+    border: 12px ridge silver;
+    box-shadow: 15px 15px 0 #000, -8px -8px 0 lime;
+  }
+  header {
+    background: linear-gradient(#ff0000, #ff9900, #ffff00);
+    color: blue;
+    padding: 18px;
+    text-align:center;
+    border-bottom: 10px double blue;
+  }
+  h1 {
+    margin:0;
+    font-size: clamp(34px, 7vw, 82px);
+    text-shadow: 5px 5px #fff, 10px 10px #00ff00;
+    transform: rotate(-2deg);
+  }
+  .ticker {
+    background: black;
+    color: yellow;
+    font-size: 25px;
+    padding: 8px;
+    white-space: nowrap;
+    overflow:hidden;
+  }
+  marquee { display:block; }
+  .grid {
+    display:grid;
+    grid-template-columns: 220px 1fr 190px;
+    gap:10px;
+    padding:10px;
+  }
+  .box {
+    background:#222;
+    border:8px outset #ddd;
+    padding:12px;
+    margin-bottom:10px;
+  }
+  .box h2 {
+    margin:0 0 8px;
+    color:#ff00ff;
+    background:yellow;
+    border:4px dotted red;
+    text-align:center;
+    font-size:22px;
+  }
+  .menu a, button {
+    display:block;
+    margin:8px 0;
+    padding:10px;
+    background:lime;
+    color:red;
+    border:5px outset white;
+    font-weight:bold;
+    text-decoration:underline;
+    font-family: Arial, Helvetica, sans-serif; font-style: normal;
+    cursor:pointer;
+  }
+  .menu a:active, button:active { border-style:inset; }
+  .hero {
+    background:#ff1493;
+    color:#001f3f;
+    border:12px double yellow;
+    padding:18px;
+    text-align:center;
+  }
+  .hero p { font-size:22px; }
+  .ugly {
+    font-size:40px;
+    animation: wobble .25s infinite alternate;
+  }
+  @keyframes wobble { from { transform:rotate(-4deg) scale(.96); } to { transform:rotate(4deg) scale(1.04); } }
+  .counter {
+    font-family: "Courier New", monospace; font-style: normal;
+    background:#000;
+    color:#00ff00;
+    font-size:34px;
+    padding:6px;
+    border:5px inset #888;
+    text-align:center;
+  }
+  .guestbook {
+    background:white;
+    color:black;
+    padding:10px;
+    border:6px groove purple;
+  }
+  .guestbook input {
+    width:100%;
+    margin:5px 0;
+    font-family: Arial, Helvetica, sans-serif; font-style: normal;
+  }
+  .cat {
+    width:100%;
+    height:170px;
+    object-fit:cover;
+    image-rendering:auto;
+    border:9px ridge #ff00ff;
+    transform:scaleX(1.5);
+  }
+  footer {
+    text-align:center;
+    background:#ff6600;
+    color:#000;
+    padding:15px;
+    border-top:10px ridge white;
+    font-size:18px;
+  }
+  .blink { animation: blink .5s infinite; }
+  .tiny { font-size:11px; }
+  .broken { color:red; text-decoration:line-through; }
+  @media (max-width: 800px) {
+    .grid { grid-template-columns:1fr; }
+  }
+body, body * { font-style: normal !important; }
+</style>
+</head>
+<body>
+
+<div class="warning">⚠️ ВНИМАНИЕ!!! ЭТО ОЧЕНЬ КРУТОЙ САЙТ!!! ⚠️</div>
+<div id="secretBar" style="display:none;background:#00ff00;color:#ff00ff;text-align:center;font-size:28px;padding:10px;border:8px dashed red;">
+  🎉 ТЫ НАШЁЛ СЕКРЕТНУЮ ПОЛОСКУ!!! НИЧЕГО НЕ ПРОИЗОШЛО!!! 🎉
+</div>
+
+<div class="wrap">
+  <header>
+    <h1>★☆ МОЯ ХОМПЕЙДЖ ☆★</h1>
+    <div style="font-size:24px">Добро пожаловать, странник интернета!!!</div>
+  </header>
+
+  <div class="ticker">
+    <marquee scrollamount="14">>>> !!! НОВОСТИ !!! Я СЕГОДНЯ ПОЕЛ ПЕЛЬМЕНИ !!! >>> ГОСТЕВАЯ КНИГА ОТКРЫТА !!! >>> НЕ КЛИКАЙ ПО КРАСНОЙ КНОПКЕ !!!</marquee>
+  </div>
+
+  <div class="grid">
+    <aside>
+      <div class="box menu">
+        <h2>МЕНЮ</h2>
+        <a href="#home">🏠 ГЛАВНАЯ</a>
+        <a href="#about">👽 ОБО МНЕ</a>
+        <a href="#links">🔗 ССЫЛКИ</a>
+        <a href="#guest">✍ ГОСТЕВАЯ</a>
+        <button onclick="alert('ТЫ ПОПАЛСЯ!!!')">НЕ НАЖИМАТЬ!!!</button>
+      </div>
+
+      <div class="box">
+        <h2>СТАТИСТИКА</h2>
+        <div class="counter" id="counter">000001</div>
+        <p class="blink">★ ВЫ 1000000-Й ПОСЕТИТЕЛЬ ★</p>
+      </div>
+
+      <div class="box">
+        <h2>ВАЖНО</h2>
+        <p>Этот сайт лучше смотреть в Internet Explorer 6.</p>
+        <p class="tiny">1024×768 рекомендуется. Монитор CRT обязателен.</p>
+      </div>
+    </aside>
+
+    <main>
+      <section id="home" class="hero">
+        <div class="ugly">🔥🔥🔥 ДОБРО ПОЖАЛОВАТЬ 🔥🔥🔥</div>
+        <p>Вы попали на самый бесполезный уголок всемирной паутины.</p>
+        <hr>
+        <p><b>ТУТ ЕСТЬ:</b></p>
+        <p>❌ Никакой пользы<br>
+        ❌ Никакого дизайна<br>
+        ❌ Никакой логики<br>
+        ✅ ЗАТО ОЧЕНЬ МНОГО АНИМАЦИИ</p>
+
+        <img class="cat"
+          src="https://placekitten.com/700/180"
+          alt="Очень растянутый кот"
+          onerror="this.style.display='none'; document.getElementById('catFallback').style.display='block';">
+        <div id="catFallback" style="display:none;background:#ffff00;color:#ff0000;font-size:50px;padding:25px;">
+          🐈 КОТ НЕ ЗАГРУЗИЛСЯ 🐈
+        </div>
+      </section>
+
+      <div class="box">
+        <h2>🧠 ТЕСТ НА ГЕНИАЛЬНОСТЬ 🧠</h2>
+        <p>Сколько будет 2 + 2?</p>
+        <button onclick="genius(4)">4</button>
+        <button onclick="genius(5)">5</button>
+        <button onclick="genius(22)">22</button>
+        <div id="geniusResult" style="font-size:24px;"></div>
+      </div>
+
+      <div class="box" id="about">
+        <h2>👤 ОБО МНЕ 👤</h2>
+        <p>Меня зовут <b>СУПЕР-ПАЦАН 3000</b>.</p>
+        <p>Я люблю компьютер, пельмени, мемы и когда мой модем издаёт звуки:</p>
+        <p style="background:black;color:white;padding:12px;font-family:monospace">
+          КРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРР
+        </p>
+        <p>Мой IQ: <span class="blink">404</span></p>
+      </div>
+
+      <div class="box" id="links">
+        <h2>🔗 МОИ СУПЕР-ССЫЛКИ 🔗</h2>
+        <ul>
+          <li><a href="https://example.com" target="_blank">Самый лучший сайт (наверное)</a></li>
+          <li><a href="#" onclick="alert('Ошибка 404: ссылка убежала'); return false;">Скачать Интернет бесплатно</a></li>
+          <li><a href="#" onclick="alert('Ваш компьютер теперь красивый!'); return false;">Проверить компьютер на красоту</a></li>
+          <li><a href="#" onclick="document.body.style.transform='rotate(1deg)';">Сделать сайт ещё кривее</a></li>
+        </ul>
+      </div>
+
+      <div class="guestbook" id="guest">
+        <h2>📖 ГОСТЕВАЯ КНИГА</h2>
+        <input id="name" placeholder="Ваше имя (обязательно: КОСМОС)">
+        <input id="msg" placeholder="Напишите что-нибудь гениальное">
+        <button onclick="signGuestbook()">ОСТАВИТЬ СООБЩЕНИЕ</button>
+        <div id="entries"><p><b>Аноним:</b> Классный сайт!!! +++</p></div>
+      </div>
+    </main>
+
+    <aside>
+      <div class="box">
+        <h2>💎 WEBMASTER</h2>
+        <p style="text-align:center;font-size:48px">😎</p>
+        <p>Сайт создан вручную, кровью и HTML.</p>
+      </div>
+
+      <div class="box">
+        <h2>ПАРТНЁРЫ</h2>
+        <p style="background:red;color:yellow;padding:10px;text-align:center;font-weight:bold">
+          ЗАРАБОТАЙ<br>1000000₽<br>ЗА 3 МИНУТЫ!!!
+        </p>
+        <p class="tiny">*не заработаете</p>
+      </div>
+
+      <div class="box">
+        <h2>🎰 КНОПКА СУДЬБЫ</h2>
+        <button onclick="fate()">НАЖМИ МЕНЯ</button>
+        <p id="fateResult" style="font-size:20px;">Твоя судьба пока неизвестна...</p>
+      </div>
+
+      <div class="box">
+        <h2>RATING</h2>
+        <p style="font-size:30px;text-align:center">★★★★★</p>
+        <p>Я сам себе поставил 5 звёзд.</p>
+      </div>
+    </aside>
+  </div>
+
+
+  <div style="text-align:center;padding:22px;background:#111;border-top:8px double #ff00ff;">
+    <button id="coffinButton" onclick="coffinPrank()"
+      style="display:inline-block;font-size:58px;line-height:1;padding:16px 28px;
+             background:#111;color:#fff;border:8px outset #777;border-radius:12px;
+             box-shadow:0 0 0 5px #000;cursor:pointer;"
+      title="НЕ НАЖИМАТЬ">
+      ⚰️
+    </button>
+    <div style="color:#ff0000;font-size:18px;margin-top:8px;">НЕ НАЖИМАТЬ НА ГРОБ!!!</div>
+  </div>
+
+  <footer>
+    <div class="blink">© 2004–2026 СУПЕР-ПАЦАН 3000™</div>
+    <div>Все права почти защищены.</div>
+    <div class="tiny">Лучше не копируйте этот сайт. Хотя кому я вру.</div>
+  </footer>
+</div>
+
+<script>
+  let n = Number(localStorage.getItem('uglyVisits') || '0') + 1;
+  localStorage.setItem('uglyVisits', n);
+  document.getElementById('counter').textContent = String(n).padStart(6, '0');
+
+  function signGuestbook() {
+    const name = document.getElementById('name').value.trim() || 'Анонимус';
+    const msg = document.getElementById('msg').value.trim() || 'Я ничего не придумал...';
+    const p = document.createElement('p');
+    const b = document.createElement('b');
+    b.textContent = name + ': ';
+    p.appendChild(b);
+    p.appendChild(document.createTextNode(msg));
+    document.getElementById('entries').appendChild(p);
+    document.getElementById('name').value = '';
+    document.getElementById('msg').value = '';
+  }
+
+  setTimeout(() => {
+    document.title = '!!! Я СКУЧАЛ ПО ТЕБЕ !!!';
+  }, 2500);
+
+  const fates = [
+    'Сегодня ты найдёшь носок, который давно потерял.',
+    'Тебе суждено съесть что-нибудь вкусное.',
+    'Осторожно: где-то рядом находится стул.',
+    'Звёзды говорят: выключи компьютер и иди пить чай.',
+    'Ты слишком красив для этого сайта.',
+    'Твоя судьба — нажать эту кнопку ещё раз.'
+  ];
+
+  function fate() {
+    document.getElementById('fateResult').textContent =
+      fates[Math.floor(Math.random() * fates.length)];
+  }
+
+  function genius(answer) {
+    const result = document.getElementById('geniusResult');
+    if (answer === 4) {
+      result.textContent = '🧠 ПРАВИЛЬНО!!! ТЫ ГЕНИЙ!!!';
+    } else {
+      result.textContent = '❌ НЕПРАВИЛЬНО!!! ТВОЙ IQ УШЁЛ В ОТПУСК!!!';
+    }
+  }
+
+  let konami = [];
+  const secretCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight'];
+  document.addEventListener('keydown', (e) => {
+    konami.push(e.key);
+    konami = konami.slice(-secretCode.length);
+    if (JSON.stringify(konami) === JSON.stringify(secretCode)) {
+      document.getElementById('secretBar').style.display = 'block';
+      alert('СЕКРЕТНЫЙ КОД АКТИВИРОВАН!!!\nПоздравляю. Ты потратил время не зря.');
+    }
+  });
+
+  document.addEventListener('click', () => {
+    if (Math.random() < 0.015) {
+      alert('💥 СИСТЕМА СООБЩАЕТ: всё работает. Пока что.');
+    }
+  });
+</script>
+
+<div id="jumpscare" style="
+  display:none; position:fixed; inset:0; z-index:99999;
+  background:#000; align-items:center; justify-content:center;
+  overflow:hidden; cursor:none;">
+  <div id="scareFace" style="
+    font-family:Arial,Helvetica,sans-serif; font-size:min(42vw,42vh);
+    line-height:1; color:#fff; text-shadow:0 0 12px red, 0 0 35px red;
+    transform:scale(1.2);">
+    👹
+  </div>
+  <div style="position:absolute;bottom:5%;left:0;right:0;text-align:center;
+    color:red;font:bold 34px Arial;letter-spacing:5px;">
+    ТЫ ДУМАЛ, ЧТО ЭТО 404...
+  </div>
+</div>
+
+<script>
+  function coffinPrank() {
+    const button = document.getElementById('coffinButton');
+    button.disabled = true;
+    button.textContent = '⚰️💀⚰️';
+
+    // Fake 404 first.
+    document.body.insertAdjacentHTML('beforeend', `
+      <div id="fake404" style="
+        position:fixed;inset:0;z-index:99998;background:#fff;color:#000;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        font-family:Arial,Helvetica,sans-serif;text-align:center;">
+        <div style="font-size:120px;font-weight:bold;">404</div>
+        <div style="font-size:28px;">Страница не найдена.</div>
+        <div style="margin-top:18px;color:#777;">Но зачем ты нажал на гроб?</div>
+      </div>
+    `);
+
+    setTimeout(() => {
+      const fake = document.getElementById('fake404');
+      if (fake) fake.remove();
+
+      const scare = document.getElementById('jumpscare');
+      scare.style.display = 'flex';
+
+      // A harmless browser beep pattern using Web Audio, if permitted.
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        [0, 0.18, 0.36].forEach((delay, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.value = i === 2 ? 95 : 180;
+          gain.gain.setValueAtTime(0.0001, ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + delay + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + 0.14);
+          osc.connect(gain).connect(ctx.destination);
+          osc.start(ctx.currentTime + delay);
+          osc.stop(ctx.currentTime + delay + 0.15);
+        });
+      } catch (e) {}
+
+      setTimeout(() => {
+        scare.style.display = 'none';
+        button.disabled = false;
+        button.textContent = '⚰️';
+      }, 2200);
+    }, 3500);
+  }
+</script>
+
+</body>
+</html>
