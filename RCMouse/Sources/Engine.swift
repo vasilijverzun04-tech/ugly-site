@@ -607,7 +607,15 @@ final class Engine: ObservableObject {
     func diagnosticsReport() -> String {
         var out = "RC Mouse — отчёт\n"
         out += "Устройства: \(deviceNames.isEmpty ? "нет" : deviceNames.joined(separator: ", "))\n"
-        out += "Универсальный доступ: \(trusted ? "да" : "НЕТ"), управление: \(config.enabled ? "вкл" : "выкл")\n\n"
+        out += "Универсальный доступ: \(trusted ? "да" : "НЕТ"), управление: \(config.enabled ? "вкл" : "выкл")\n"
+        let m = config.mouse
+        func ax(_ k: String?) -> String {
+            guard let k = k else { return "не назначена" }
+            guard infos[k] != nil else { return "\(k) (нет такого входа сейчас!)" }
+            return "\(label(forKey: k)) = \(String(format: "%.2f", normalized(k)))"
+        }
+        out += "Мышь: режим \(m.mode.rawValue), X: \(ax(m.xAxis)), Y: \(ax(m.yAxis)), скорость \(Int(m.speed)), мёртвая зона \(m.deadzone)\n"
+        out += "Прокрутка: ↕ \(ax(m.scrollV)), ↔ \(ax(m.scrollH))\n\n"
         out += "Входы:\n"
         let all = infos.values.sorted { ($0.kind.order, $0.cookie) < ($1.kind.order, $1.cookie) }
         for i in all {
@@ -624,6 +632,32 @@ final class Engine: ObservableObject {
         }
         out += "\nПоследние события:\n" + (eventLog.isEmpty ? "  (нет)\n" : eventLog.map { "  " + $0 }.joined(separator: "\n") + "\n")
         return out
+    }
+
+    private var testStep = 0
+    private var testStart = CGPoint.zero
+    private var testTimer: Timer?
+
+    /// Рисует курсором кружок — проверка, что macOS разрешает программе двигать мышь
+    func testCursor() {
+        testTimer?.invalidate()
+        testStep = 0
+        testStart = Output.cursor
+        let t = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in self?.testTick() }
+        RunLoop.main.add(t, forMode: .common)
+        testTimer = t
+    }
+
+    private func testTick() {
+        testStep += 1
+        let a = Double(testStep) / 60.0 * 2 * Double.pi
+        let p = CGPoint(x: testStart.x + CGFloat(cos(a) * 80) - 80, y: testStart.y + CGFloat(sin(a) * 80))
+        Output.move(to: p, dx: 0, dy: 0, drag: nil)
+        if testStep >= 60 {
+            testTimer?.invalidate()
+            testTimer = nil
+            log("Тест курсора выполнен (курсор \(Output.cursor == testStart ? "НЕ сдвинулся" : "двигается"))")
+        }
     }
 
     func copyDiagnostics() {

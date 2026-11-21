@@ -82,6 +82,16 @@ struct HeaderView: View {
                 }
             }
 
+            HStack(spacing: 12) {
+                Text("Курсор:").foregroundColor(.secondary)
+                Text(axisInfo(engine.config.mouse.xAxis, "↔"))
+                Text(axisInfo(engine.config.mouse.yAxis, "↕"))
+                Spacer()
+                Button("🖱 Тест курсора") { engine.testCursor() }
+                    .help("Программа сама нарисует курсором кружок. Если курсор не двинулся — macOS не дала доступ: перезапустите программу.")
+            }
+            .font(.callout)
+
             HStack {
                 Text("Последний сработавший вход:").foregroundColor(.secondary)
                 if let k = live.lastKey {
@@ -94,6 +104,14 @@ struct HeaderView: View {
             .font(.callout)
         }
         .padding(12)
+    }
+}
+
+extension HeaderView {
+    func axisInfo(_ key: String?, _ arrow: String) -> String {
+        guard let k = key else { return "\(arrow) ось не выбрана (вкладка «Мышь»)" }
+        let v = live.values[k] ?? 0
+        return "\(arrow) \(engine.label(forKey: k)): \(String(format: "%+.2f", v))"
     }
 }
 
