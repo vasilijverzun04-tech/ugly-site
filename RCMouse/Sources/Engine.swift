@@ -605,7 +605,7 @@ final class Engine: ObservableObject {
     }
 
     func diagnosticsReport() -> String {
-        var out = "T8L Mouse — отчёт\n"
+        var out = "RC Mouse — отчёт\n"
         out += "Устройства: \(deviceNames.isEmpty ? "нет" : deviceNames.joined(separator: ", "))\n"
         out += "Универсальный доступ: \(trusted ? "да" : "НЕТ"), управление: \(config.enabled ? "вкл" : "выкл")\n\n"
         out += "Входы:\n"

@@ -148,6 +148,6 @@ enum Output {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/bin/zsh")
         p.arguments = ["-lc", trimmed]
-        do { try p.run() } catch { NSLog("T8LMouse: не удалось выполнить команду: \(error)") }
+        do { try p.run() } catch { NSLog("RCMouse: не удалось выполнить команду: \(error)") }
     }
 }

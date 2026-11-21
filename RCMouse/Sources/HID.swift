@@ -41,7 +41,7 @@ final class HIDInput {
         IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue)
         let r = IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
         if r != kIOReturnSuccess {
-            NSLog("T8LMouse: IOHIDManagerOpen вернул \(r)")
+            NSLog("RCMouse: IOHIDManagerOpen вернул \(r)")
         }
     }
 

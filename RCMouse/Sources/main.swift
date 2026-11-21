@@ -17,11 +17,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1000, height: 760),
                           styleMask: [.titled, .closable, .miniaturizable, .resizable],
                           backing: .buffered, defer: false)
-        window.title = "T8L Mouse — пульт RadioMaster как мышь"
+        window.title = "RC Mouse — пульт RadioMaster как мышь"
         window.isReleasedWhenClosed = false
         window.contentView = NSHostingView(rootView: ContentView().environmentObject(engine))
         window.center()
-        window.setFrameAutosaveName("T8LMouseMain")
+        window.setFrameAutosaveName("RCMouseMain")
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
 
@@ -83,9 +83,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let appItem = NSMenuItem()
         main.addItem(appItem)
         let appMenu = NSMenu()
-        appMenu.addItem(withTitle: "Скрыть T8L Mouse", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
+        appMenu.addItem(withTitle: "Скрыть RC Mouse", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Выйти из T8L Mouse", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        appMenu.addItem(withTitle: "Выйти из RC Mouse", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         appItem.submenu = appMenu
 
         let editItem = NSMenuItem()

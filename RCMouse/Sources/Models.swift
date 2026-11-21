@@ -320,13 +320,17 @@ extension AppConfig {
 // MARK: - Сохранение
 
 enum Storage {
-    static var url: URL {
+    static func url(folder: String) -> URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return base.appendingPathComponent("T8LMouse", isDirectory: true).appendingPathComponent("config.json")
+        return base.appendingPathComponent(folder, isDirectory: true).appendingPathComponent("config.json")
     }
 
+    static var url: URL { url(folder: "RCMouse") }
+    /// Настройки старой версии (когда программа называлась T8L Mouse) — подхватываем автоматически
+    static var legacyURL: URL { url(folder: "T8LMouse") }
+
     static func load() -> AppConfig {
-        guard let data = try? Data(contentsOf: url),
+        guard let data = (try? Data(contentsOf: url)) ?? (try? Data(contentsOf: legacyURL)),
               let cfg = try? JSONDecoder().decode(AppConfig.self, from: data) else { return AppConfig() }
         return cfg
     }
@@ -338,7 +342,7 @@ enum Storage {
             enc.outputFormatting = [.prettyPrinted, .sortedKeys]
             try enc.encode(cfg).write(to: url, options: .atomic)
         } catch {
-            NSLog("T8LMouse: не удалось сохранить настройки: \(error)")
+            NSLog("RCMouse: не удалось сохранить настройки: \(error)")
         }
     }
 }

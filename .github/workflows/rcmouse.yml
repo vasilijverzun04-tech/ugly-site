@@ -1,4 +1,4 @@
-name: Build T8L Mouse app
+name: Build RC Mouse app
 
 on:
   push:
@@ -14,31 +14,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build T8LMouse.app
-        working-directory: T8LMouse
+      - name: Build RC Mouse.app
+        working-directory: RCMouse
         run: |
           set -o pipefail
           ./build.sh ci 2>&1 | tee ../build.log
 
       - name: Package
         run: |
-          cd T8LMouse/build
-          ditto -c -k --sequesterRsrc --keepParent T8LMouse.app ../../T8LMouse-mac.zip
+          cd RCMouse/build
+          ditto -c -k --sequesterRsrc --keepParent "RC Mouse.app" ../../RCMouse-mac.zip
 
       - uses: actions/upload-artifact@v4
         with:
-          name: T8LMouse-mac
-          path: T8LMouse-mac.zip
+          name: RCMouse-mac
+          path: RCMouse-mac.zip
 
       - name: Publish download (GitHub Release)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete t8lmouse-latest --yes --cleanup-tag || true
-          gh release create t8lmouse-latest T8LMouse-mac.zip \
+          gh release delete rcmouse-latest --yes --cleanup-tag || true
+          gh release create rcmouse-latest RCMouse-mac.zip \
             --target "$GITHUB_SHA" \
-            --title "T8L Mouse для Mac (M1/M2/M3)" \
-            --notes "Скачайте T8LMouse-mac.zip, распакуйте и перетащите T8LMouse в «Программы». Первый запуск: правый клик → Открыть."
+            --title "RC Mouse для Mac (M1/M2/M3)" \
+            --notes "Скачайте RCMouse-mac.zip, распакуйте и перетащите RC Mouse в «Программы». Первый запуск: правый клик → Открыть."
 
       - name: Save build log on failure
         if: failure()

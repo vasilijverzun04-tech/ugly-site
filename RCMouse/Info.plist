@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>T8LMouse</string>
+    <string>RC Mouse</string>
     <key>CFBundleDisplayName</key>
-    <string>T8L Mouse</string>
+    <string>RC Mouse</string>
     <key>CFBundleIdentifier</key>
-    <string>local.t8lmouse.app</string>
+    <string>local.rcmouse.app</string>
     <key>CFBundleExecutable</key>
-    <string>T8LMouse</string>
+    <string>RCMouse</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Сборка T8LMouse.app. Нужны только Command Line Tools: xcode-select --install
+# Сборка «RC Mouse.app». Нужны только Command Line Tools: xcode-select --install
 # Использование:  ./build.sh           — собрать в папку build/
 #                 ./build.sh install   — собрать и скопировать в /Applications
 set -euo pipefail
@@ -11,7 +11,7 @@ if ! xcrun --find swiftc >/dev/null 2>&1; then
 fi
 
 ARCH="${ARCH:-$(uname -m)}"  # arm64 на M1/M2/M3
-APP="build/T8LMouse.app"
+APP="build/RC Mouse.app"
 
 echo "==> Сборка для ${ARCH}…"
 rm -rf "$APP"
@@ -21,7 +21,7 @@ xcrun -sdk macosx swiftc -O -swift-version 5 \
     -target "${ARCH}-apple-macos12.0" \
     -framework IOKit -framework AppKit -framework SwiftUI -framework ApplicationServices \
     Sources/*.swift \
-    -o "$APP/Contents/MacOS/T8LMouse"
+    -o "$APP/Contents/MacOS/RCMouse"
 
 cp Info.plist "$APP/Contents/Info.plist"
 
@@ -42,10 +42,10 @@ echo "==> Готово: $APP"
 if [[ "${1:-}" == "ci" ]]; then
     exit 0
 elif [[ "${1:-}" == "install" ]]; then
-    rm -rf "/Applications/T8LMouse.app"
+    rm -rf "/Applications/RC Mouse.app"
     cp -R "$APP" /Applications/
-    echo "==> Установлено в /Applications/T8LMouse.app"
-    open "/Applications/T8LMouse.app"
+    echo "==> Установлено в /Applications/RC Mouse.app"
+    open "/Applications/RC Mouse.app"
 else
     open "$APP"
 fi
