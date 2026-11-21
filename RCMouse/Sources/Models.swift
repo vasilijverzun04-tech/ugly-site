@@ -97,7 +97,7 @@ enum PressMode: String, Codable, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .tap: return "Один раз при включении"
-        case .hold: return "Удерживать, пока активно"
+        case .hold: return "Удерживать, пока держу кнопку"
         case .repeatWhile: return "Повторять, пока активно"
         }
     }
@@ -179,7 +179,7 @@ enum MediaKey: Int, Codable, CaseIterable, Identifiable {
 
 struct BindAction: Codable, Equatable {
     var type: ActionType = .nothing
-    var mode: PressMode = .tap
+    var mode: PressMode = .hold
     var keyCode: Int = -1
     var cmd = false
     var shift = false
@@ -252,6 +252,7 @@ struct AppConfig: Codable, Equatable {
     var bindings: [String: BindAction] = [:]
     var labels: [String: String] = [:]
     var calibration: [String: AxisCal] = [:]
+    var version: Int = 0
 }
 
 // MARK: - Устойчивое чтение JSON (новые/отсутствующие поля не ломают настройки)
@@ -314,6 +315,7 @@ extension AppConfig {
         bindings = c.get(.bindings, d.bindings)
         labels = c.get(.labels, d.labels)
         calibration = c.get(.calibration, d.calibration)
+        version = c.get(.version, d.version)
     }
 }
 

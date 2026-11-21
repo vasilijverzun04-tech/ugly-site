@@ -10,9 +10,9 @@ extension Engine {
             set: { newValue in
                 var v = newValue
                 let old = self.config.bindings[bk]
-                // Для настоящих кнопок по умолчанию логичнее «удерживать» (как кнопка мыши/клавиатуры)
-                if old == nil, info.kind == .button, v.type.isMouseButton || v.type == .key {
-                    v.mode = .hold
+                // При выборе нового действия по умолчанию — «удерживать, пока держу кнопку»
+                if old?.type != v.type {
+                    v.mode = (v.type == .doubleClick) ? .tap : .hold
                 }
                 self.config.bindings[bk] = (v.type == .nothing) ? nil : v
             })
@@ -295,6 +295,17 @@ struct AxisBar: View {
 struct ActionEditor: View {
     @Binding var action: BindAction
 
+    var modeHint: String {
+        switch action.mode {
+        case .hold:
+            if action.type.isMouseButton { return "Кнопка мыши зажата, пока вы держите кнопку на пульте (можно перетаскивать)." }
+            if action.type == .key { return "Клавиша зажата, пока вы держите кнопку; при долгом удержании повторяется, как на клавиатуре." }
+            return "Действие продолжается, пока вы держите кнопку на пульте."
+        case .tap: return "Срабатывает один раз в момент нажатия."
+        case .repeatWhile: return "Повторяется (как автокликер), пока вы держите кнопку."
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
@@ -309,8 +320,14 @@ struct ActionEditor: View {
                         ForEach(PressMode.allCases) { m in Text(m.title).tag(m) }
                     }
                     .labelsHidden()
-                    .frame(width: 230)
+                    .frame(width: 250)
                 }
+            }
+
+            if action.type.supportsMode {
+                Text(modeHint)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
 
             if action.type == .key {
@@ -528,7 +545,7 @@ struct HelpTab: View {
                 Group {
                     Text("Режимы нажатия").font(.title3).bold().padding(.top, 6)
                     Text("• Один раз при включении — действие срабатывает, когда тумблер/кнопка переходит в это положение.")
-                    Text("• Удерживать, пока активно — например, левая кнопка мыши зажата, пока тумблер в этом положении (удобно для перетаскивания).")
+                    Text("• Удерживать, пока держу кнопку (по умолчанию) — например, левая кнопка мыши зажата, пока вы держите кнопку на пульте: можно перетаскивать окна и файлы. Клавиши при долгом удержании повторяются, как на клавиатуре.")
                     Text("• Повторять, пока активно — автокликер / автоповтор клавиши.")
                 }
                 Group {

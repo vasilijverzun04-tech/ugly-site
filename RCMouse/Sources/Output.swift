@@ -94,9 +94,10 @@ enum Output {
 
     // MARK: Клавиатура
 
-    static func key(_ code: CGKeyCode, down: Bool, flags: CGEventFlags) {
+    static func key(_ code: CGKeyCode, down: Bool, flags: CGEventFlags, autorepeat: Bool = false) {
         guard let e = CGEvent(keyboardEventSource: source, virtualKey: code, keyDown: down) else { return }
         e.flags = flags
+        if autorepeat { e.setIntegerValueField(.keyboardEventAutorepeat, value: 1) }
         e.post(tap: .cghidEventTap)
     }
 
@@ -107,6 +108,18 @@ enum Output {
         if a.shift { r.append((56, .maskShift)) }
         if a.cmd { r.append((55, .maskCommand)) }
         return r
+    }
+
+    static func flags(_ a: BindAction) -> CGEventFlags {
+        var f: CGEventFlags = []
+        for (_, flag) in modifiers(a) { f.insert(flag) }
+        return f
+    }
+
+    /// Автоповтор зажатой клавиши — как при удержании клавиши на настоящей клавиатуре
+    static func keyAutorepeat(_ a: BindAction) {
+        guard a.keyCode >= 0 else { return }
+        key(CGKeyCode(a.keyCode), down: true, flags: flags(a), autorepeat: true)
     }
 
     static func keyCombo(_ a: BindAction, down: Bool) {

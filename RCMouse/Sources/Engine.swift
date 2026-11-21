@@ -66,7 +66,17 @@ final class Engine: ObservableObject {
     private var learnTimer: Timer?
 
     private init() {
-        config = Storage.load()
+        var c = Storage.load()
+        // Версия 2: «удерживать» стало режимом по умолчанию — переводим старые назначения
+        if c.version < 2 {
+            for (k, a) in c.bindings where a.mode == .tap && a.type.supportsMode && a.type != .doubleClick {
+                var b = a
+                b.mode = .hold
+                c.bindings[k] = b
+            }
+            c.version = 2
+        }
+        config = c
     }
 
     // MARK: - Запуск
@@ -279,7 +289,9 @@ final class Engine: ObservableObject {
         case .key:
             switch a.mode {
             case .tap: Output.keyTap(a)
-            case .hold: Output.keyCombo(a, down: true)
+            case .hold:
+                Output.keyCombo(a, down: true)
+                if a.keyCode >= 0 { startRepeat(bk) { Output.keyAutorepeat(a) } }
             case .repeatWhile:
                 Output.keyTap(a)
                 startRepeat(bk) { Output.keyTap(a) }
@@ -288,7 +300,7 @@ final class Engine: ObservableObject {
             if a.mode == .tap { Output.scrollStep(a.type) } else { heldScroll[bk] = a.type }
         case .media:
             Output.media(a.media.rawValue)
-            if a.mode == .repeatWhile { startRepeat(bk) { Output.media(a.media.rawValue) } }
+            if a.mode != .tap { startRepeat(bk) { Output.media(a.media.rawValue) } }
         case .precision:
             precisionCount += 1
         case .turbo:
