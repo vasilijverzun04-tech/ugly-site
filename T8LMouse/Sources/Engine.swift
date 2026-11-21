@@ -60,6 +60,9 @@ final class Engine: ObservableObject {
     private var timers: [Timer] = []
     private var activity: NSObjectProtocol?
     private var learnBase: [String: Double] = [:]
+    private var revealed = Set<String>()
+    private var firstRaw: [String: Int] = [:]
+    private var eventLog: [String] = []
     private var learnTimer: Timer?
 
     private init() {
@@ -144,7 +147,7 @@ final class Engine: ObservableObject {
     }
 
     private func rebuildControls() {
-        controls = infos.values.sorted {
+        controls = infos.values.filter { !$0.hidden || revealed.contains($0.key) }.sorted {
             ($0.kind.order, $0.usagePage, $0.usage, $0.cookie) < ($1.kind.order, $1.usagePage, $1.usage, $1.cookie)
         }
     }
@@ -165,6 +168,15 @@ final class Engine: ObservableObject {
 
     private func value(_ k: String, _ v: Int) {
         guard let info = infos[k] else { return }
+        if info.hidden && !revealed.contains(k) {
+            if let r0 = firstRaw[k] ?? raw[k], r0 != v {
+                revealed.insert(k)
+                rebuildControls()
+                log("Обнаружен дополнительный вход \(info.defaultName)")
+            } else if firstRaw[k] == nil {
+                firstRaw[k] = v
+            }
+        }
         raw[k] = v
         if info.kind == .axis {
             autoRange[k] = autoRange[k].map { (min($0.0, v), max($0.1, v)) } ?? (v, v)
@@ -188,6 +200,7 @@ final class Engine: ObservableObject {
         let consumed = checkLearning(k, info, n, new)
         guard new != old else { return }
         zones[k] = new
+        log("\(label(info)): \(old?.title ?? "—") → \(new?.title ?? "отпущена")  [сырое \(v), норм. \(String(format: "%.2f", n))]")
         if let o = old { end(bindKey(k, o)) }
         if let z = new, !consumed { begin(bindKey(k, z)) }
     }
@@ -580,6 +593,42 @@ final class Engine: ObservableObject {
     func resetCalibration() {
         config.calibration = [:]
         dirty = true
+    }
+
+    // MARK: - Диагностика
+
+    private func log(_ s: String) {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm:ss.SSS"
+        eventLog.append("\(f.string(from: Date()))  \(s)")
+        if eventLog.count > 60 { eventLog.removeFirst(eventLog.count - 60) }
+    }
+
+    func diagnosticsReport() -> String {
+        var out = "T8L Mouse — отчёт\n"
+        out += "Устройства: \(deviceNames.isEmpty ? "нет" : deviceNames.joined(separator: ", "))\n"
+        out += "Универсальный доступ: \(trusted ? "да" : "НЕТ"), управление: \(config.enabled ? "вкл" : "выкл")\n\n"
+        out += "Входы:\n"
+        let all = infos.values.sorted { ($0.kind.order, $0.cookie) < ($1.kind.order, $1.cookie) }
+        for i in all {
+            let r = raw[i.key].map { String($0) } ?? "—"
+            let z = zones[i.key]?.title ?? "—"
+            out += String(format: "  %@ | %@ | page 0x%lX usage 0x%lX cookie %ld | %ld…%ld | сырое %@ | норм %.2f | %@%@\n",
+                          label(i), i.kind.title, i.usagePage, i.usage, i.cookie, i.logicalMin, i.logicalMax,
+                          r, normalized(i.key), z, i.hidden ? " | доп." : "")
+            for zone in i.zones {
+                if let a = config.bindings[bindKey(i.key, zone)] {
+                    out += "      \(zone.title): \(a.shortTitle) (\(a.mode.title))\n"
+                }
+            }
+        }
+        out += "\nПоследние события:\n" + (eventLog.isEmpty ? "  (нет)\n" : eventLog.map { "  " + $0 }.joined(separator: "\n") + "\n")
+        return out
+    }
+
+    func copyDiagnostics() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(diagnosticsReport(), forType: .string)
     }
 
     // MARK: - Подписи

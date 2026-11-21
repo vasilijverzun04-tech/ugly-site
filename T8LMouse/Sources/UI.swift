@@ -126,6 +126,7 @@ struct InputsTab: View {
                             .font(.callout).foregroundColor(.secondary)
                     }
                     Spacer()
+                    CopyReportButton()
                 }
                 .padding(10)
                 Divider()
@@ -480,6 +481,19 @@ struct CalibrationTab: View {
     }
 }
 
+struct CopyReportButton: View {
+    @EnvironmentObject var engine: Engine
+    @State var copied = false
+    var body: some View {
+        Button(copied ? "✓ Скопировано" : "📋 Скопировать отчёт") {
+            engine.copyDiagnostics()
+            copied = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copied = false }
+        }
+        .help("Копирует список всех входов пульта и последние события — пришлите его, если что-то не работает")
+    }
+}
+
 // MARK: - Справка
 
 struct HelpTab: View {
@@ -511,6 +525,8 @@ struct HelpTab: View {
                     Text("• Курсор не двигается, но значения на вкладке меняются → нет разрешения «Универсальный доступ». После пересборки программы его нужно выдать заново (удалите старую запись кнопкой «−» и добавьте снова).")
                     Text("• Пульт не виден → проверьте кабель (некоторые кабели только заряжают) и режим USB на пульте.")
                     Text("• Курсор сам уплывает → вкладка «Калибровка» или увеличьте мёртвую зону.")
+                    Text("• Кнопка/тумблер не реагирует → понажимайте её, затем «📋 Скопировать отчёт» на вкладке «Кнопки и тумблеры» и пришлите текст.")
+                    Text("• На T8L кнопки SA и SD — без фиксации: обычно «минимум» = отпущена, «максимум» = нажата. Назначайте действие на «максимум» и режим «Удерживать» или «Один раз».")
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

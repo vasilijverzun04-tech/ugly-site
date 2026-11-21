@@ -65,8 +65,10 @@ final class HIDInput {
             guard t == 1 || t == 2 || t == 3 else { continue }
             let page = Int(IOHIDElementGetUsagePage(e))
             let usage = Int(IOHIDElementGetUsage(e))
-            if page == 0 || page >= 0xFF00 || usage == 0 || usage == 0xFFFF_FFFF { continue }
+            // Нестандартные входы НЕ выкидываем: у некоторых пультов каналы описаны именно так.
+            let unusual = page == 0 || page >= 0xFF00 || usage == 0 || usage == 0xFFFF_FFFF
             if IOHIDElementGetReportSize(e) == 0 { continue }
+            if page == 0 && usage == 0 && IOHIDElementGetLogicalMax(e) == IOHIDElementGetLogicalMin(e) { continue }
 
             let k = HIDInput.key(e)
             if seen.contains(k) { continue }
@@ -89,8 +91,9 @@ final class HIDInput {
                 key: k, kind: kind, usagePage: page, usage: usage,
                 cookie: Int(IOHIDElementGetCookie(e)),
                 logicalMin: lmin, logicalMax: lmax,
-                defaultName: HIDInput.name(page: page, usage: usage),
-                device: product))
+                defaultName: unusual ? "Доп. вход #\(IOHIDElementGetCookie(e))" : HIDInput.name(page: page, usage: usage),
+                device: product,
+                hidden: unusual))
 
             // Текущее значение — чтобы знать, в каком положении тумблеры уже стоят
             let ptr = UnsafeMutablePointer<Unmanaged<IOHIDValue>>.allocate(capacity: 1)

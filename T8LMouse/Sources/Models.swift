@@ -75,6 +75,8 @@ struct ControlInfo: Identifiable, Hashable {
     let logicalMax: Int
     var defaultName: String
     let device: String
+    /// Нестандартный вход (без usage / vendor page) — показывается, когда впервые изменится
+    var hidden: Bool = false
 
     var id: String { key }
 
