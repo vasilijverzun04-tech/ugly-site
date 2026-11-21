@@ -64,17 +64,18 @@ final class Engine: ObservableObject {
     private var firstRaw: [String: Int] = [:]
     private var eventLog: [String] = []
     private var learnTimer: Timer?
+    private var pendingLong: [String: Timer] = [:]
 
     private init() {
         var c = Storage.load()
-        // Версия 2: «удерживать» стало режимом по умолчанию — переводим старые назначения
-        if c.version < 2 {
-            for (k, a) in c.bindings where a.mode == .tap && a.type.supportsMode && a.type != .doubleClick {
-                var b = a
-                b.mode = .hold
-                c.bindings[k] = b
+        // Версия 3: у каждой кнопки два действия — «короткое нажатие» и «удержание».
+        // Старые назначения с режимом «удерживать/повторять» переезжают в «удержание».
+        if c.version < 3 {
+            for (k, a) in c.bindings where !k.hasSuffix(Engine.longSuffix) && a.mode != .tap && a.type.supportsMode {
+                if c.bindings[k + Engine.longSuffix] == nil { c.bindings[k + Engine.longSuffix] = a }
+                c.bindings[k] = nil
             }
-            c.version = 2
+            c.version = 3
         }
         config = c
     }
@@ -145,7 +146,7 @@ final class Engine: ObservableObject {
     private func deviceRemoved(_ name: String, _ keys: [String]) {
         for k in keys {
             if let info = infos[k] {
-                for z in info.zones { end(bindKey(k, z)) }
+                for z in info.zones { exitZone(k, z, fireShort: false) }
             }
             infos[k] = nil
             raw[k] = nil
@@ -174,7 +175,46 @@ final class Engine: ObservableObject {
 
     // MARK: - Обработка входов
 
+    static let longSuffix = "|long"
     func bindKey(_ k: String, _ z: Zone) -> String { "\(k)|\(z.rawValue)" }
+    func bindKey(_ k: String, _ z: Zone, long: Bool) -> String { bindKey(k, z) + (long ? Engine.longSuffix : "") }
+
+    private func bound(_ bk: String) -> BindAction? {
+        guard let a = config.bindings[bk], a.type != .nothing else { return nil }
+        return a
+    }
+
+    /// Кнопка/положение стало активным
+    private func enterZone(_ k: String, _ z: Zone) {
+        let sk = bindKey(k, z), lk = bindKey(k, z, long: true)
+        let hasShort = bound(sk) != nil, hasLong = bound(lk) != nil
+        if hasShort && hasLong {
+            // Ждём: отпустят быстро — короткое действие, держат дольше — удержание
+            pendingLong[sk]?.invalidate()
+            let t = Timer(timeInterval: max(0.1, config.mouse.longPressTime), repeats: false) { [weak self] _ in
+                guard let self = self else { return }
+                self.pendingLong[sk] = nil
+                self.begin(lk, slot: .long)
+            }
+            RunLoop.main.add(t, forMode: .common)
+            pendingLong[sk] = t
+        } else if hasLong {
+            begin(lk, slot: .long)
+        } else if hasShort {
+            begin(sk, slot: .short)
+        }
+    }
+
+    /// Кнопку отпустили / тумблер ушёл из положения
+    private func exitZone(_ k: String, _ z: Zone, fireShort: Bool = true) {
+        let sk = bindKey(k, z), lk = bindKey(k, z, long: true)
+        if let t = pendingLong.removeValue(forKey: sk) {
+            t.invalidate()
+            if fireShort { begin(sk, slot: .short) }   // отпустили до порога — это короткое нажатие
+        }
+        end(sk)
+        end(lk)
+    }
 
     private func value(_ k: String, _ v: Int) {
         guard let info = infos[k] else { return }
@@ -211,8 +251,8 @@ final class Engine: ObservableObject {
         guard new != old else { return }
         zones[k] = new
         log("\(label(info)): \(old?.title ?? "—") → \(new?.title ?? "отпущена")  [сырое \(v), норм. \(String(format: "%.2f", n))]")
-        if let o = old { end(bindKey(k, o)) }
-        if let z = new, !consumed { begin(bindKey(k, z)) }
+        if let o = old { exitZone(k, o) }
+        if let z = new, !consumed { enterZone(k, z) }
     }
 
     private func zoneFor(_ info: ControlInfo, current: Zone?) -> Zone? {
@@ -266,9 +306,16 @@ final class Engine: ObservableObject {
 
     // MARK: - Действия
 
-    private func begin(_ bk: String) {
-        guard let a = config.bindings[bk], a.type != .nothing else { return }
+    enum Slot { case short, long }
+
+    private func begin(_ bk: String, slot: Slot) {
+        guard var a = bound(bk) else { return }
         if !config.enabled && !a.type.worksWhenDisabled { return }
+        // Короткое нажатие — всегда один раз; удержание — держать (или повторять) до отпускания
+        switch slot {
+        case .short: a.mode = .tap
+        case .long: if a.mode != .repeatWhile { a.mode = .hold }
+        }
         started[bk] = a
 
         switch a.type {
@@ -338,17 +385,17 @@ final class Engine: ObservableObject {
     }
 
     func releaseAll() {
+        for t in pendingLong.values { t.invalidate() }
+        pendingLong = [:]
         for bk in Array(started.keys) { end(bk) }
     }
 
     /// После включения — вернуть «удерживаемые» действия тех тумблеров, что уже стоят в нужном положении
     private func resumeContinuous() {
         for (k, z) in zones {
-            let bk = bindKey(k, z)
-            guard started[bk] == nil, let a = config.bindings[bk] else { continue }
-            let continuous = a.type == .precision || a.type == .turbo
-                || (a.type.supportsMode && a.mode == .hold)
-            if continuous { begin(bk) }
+            let bk = bindKey(k, z, long: true)
+            guard started[bk] == nil, bound(bk) != nil else { continue }
+            begin(bk, slot: .long)
         }
     }
 
@@ -638,7 +685,10 @@ final class Engine: ObservableObject {
                           r, normalized(i.key), z, i.hidden ? " | доп." : "")
             for zone in i.zones {
                 if let a = config.bindings[bindKey(i.key, zone)] {
-                    out += "      \(zone.title): \(a.shortTitle) (\(a.mode.title))\n"
+                    out += "      \(zone.title) — коротко: \(a.shortTitle)\n"
+                }
+                if let a = config.bindings[bindKey(i.key, zone, long: true)] {
+                    out += "      \(zone.title) — удержание: \(a.shortTitle) (\(a.mode.title))\n"
                 }
             }
         }
@@ -697,8 +747,9 @@ final class Engine: ObservableObject {
         if m.scrollV == info.key { parts.append("прокрутка ↕") }
         if m.scrollH == info.key { parts.append("прокрутка ↔") }
         for z in info.zones {
-            guard let a = config.bindings[bindKey(info.key, z)], a.type != .nothing else { continue }
-            parts.append(z.short.isEmpty ? a.shortTitle : "\(z.short) \(a.shortTitle)")
+            let p = z.short.isEmpty ? "" : "\(z.short) "
+            if let a = bound(bindKey(info.key, z)) { parts.append("\(p)👆 \(a.shortTitle)") }
+            if let a = bound(bindKey(info.key, z, long: true)) { parts.append("\(p)✊ \(a.shortTitle)") }
         }
         return parts.isEmpty ? "не назначено" : parts.joined(separator: " · ")
     }

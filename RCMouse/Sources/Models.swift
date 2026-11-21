@@ -179,7 +179,7 @@ enum MediaKey: Int, Codable, CaseIterable, Identifiable {
 
 struct BindAction: Codable, Equatable {
     var type: ActionType = .nothing
-    var mode: PressMode = .hold
+    var mode: PressMode = .tap
     var keyCode: Int = -1
     var cmd = false
     var shift = false
@@ -237,6 +237,7 @@ struct MouseSettings: Codable, Equatable {
     var zoneThreshold: Double = 0.35
     var repeatInterval: Double = 0.1
     var repeatDelay: Double = 0.35
+    var longPressTime: Double = 0.35
     var autoAssigned = false
 }
 
@@ -302,6 +303,7 @@ extension MouseSettings {
         zoneThreshold = c.get(.zoneThreshold, d.zoneThreshold)
         repeatInterval = c.get(.repeatInterval, d.repeatInterval)
         repeatDelay = c.get(.repeatDelay, d.repeatDelay)
+        longPressTime = c.get(.longPressTime, d.longPressTime)
         autoAssigned = c.get(.autoAssigned, d.autoAssigned)
     }
 }

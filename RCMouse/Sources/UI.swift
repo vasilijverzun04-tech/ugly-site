@@ -3,17 +3,14 @@ import SwiftUI
 // MARK: - Привязки для интерфейса
 
 extension Engine {
-    func actionBinding(_ info: ControlInfo, _ zone: Zone) -> Binding<BindAction> {
-        let bk = bindKey(info.key, zone)
+    func actionBinding(_ info: ControlInfo, _ zone: Zone, long: Bool) -> Binding<BindAction> {
+        let bk = bindKey(info.key, zone, long: long)
         return Binding(
-            get: { self.config.bindings[bk] ?? BindAction() },
+            get: { self.config.bindings[bk] ?? BindAction(mode: long ? .hold : .tap) },
             set: { newValue in
                 var v = newValue
                 let old = self.config.bindings[bk]
-                // При выборе нового действия по умолчанию — «удерживать, пока держу кнопку»
-                if old?.type != v.type {
-                    v.mode = (v.type == .doubleClick) ? .tap : .hold
-                }
+                if old?.type != v.type { v.mode = long ? .hold : .tap }
                 self.config.bindings[bk] = (v.type == .nothing) ? nil : v
             })
     }
@@ -199,11 +196,22 @@ struct ControlRow: View {
                             ZoneDot(live: engine.live, key: info.key, zone: z)
                                 .padding(.top, 5)
                             Text(z.title)
-                                .frame(width: 200, alignment: .leading)
+                                .frame(width: 190, alignment: .leading)
                                 .padding(.top, 3)
-                            ActionEditor(action: engine.actionBinding(info, z))
+                            VStack(alignment: .leading, spacing: 10) {
+                                HStack(alignment: .top) {
+                                    Text("👆 Короткое нажатие").frame(width: 160, alignment: .leading).padding(.top, 3)
+                                    ActionEditor(action: engine.actionBinding(info, z, long: false), long: false)
+                                }
+                                HStack(alignment: .top) {
+                                    Text("✊ Удержание").frame(width: 160, alignment: .leading).padding(.top, 3)
+                                    ActionEditor(action: engine.actionBinding(info, z, long: true), long: true)
+                                }
+                            }
                         }
                     }
+                    Text("Можно задать оба действия: отпустили быстрее \(String(format: "%.2f", engine.config.mouse.longPressTime)) с — сработает «короткое нажатие», держите дольше — «удержание» (длится, пока не отпустите). Если задано только одно — срабатывает сразу.")
+                        .font(.caption).foregroundColor(.secondary)
                     if info.kind == .axis {
                         Text("Границы положений: ±\(Int(engine.config.mouse.zoneThreshold * 100))% (меняется во вкладке «Мышь»). Зелёная точка — текущее положение.")
                             .font(.caption).foregroundColor(.secondary)
@@ -294,8 +302,10 @@ struct AxisBar: View {
 
 struct ActionEditor: View {
     @Binding var action: BindAction
+    var long: Bool = true
 
     var modeHint: String {
+        if !long { return "Срабатывает один раз." }
         switch action.mode {
         case .hold:
             if action.type.isMouseButton { return "Кнопка мыши зажата, пока вы держите кнопку на пульте (можно перетаскивать)." }
@@ -315,16 +325,17 @@ struct ActionEditor: View {
                 .labelsHidden()
                 .frame(width: 280)
 
-                if action.type.supportsMode {
+                if long && action.type.supportsMode {
                     Picker("", selection: $action.mode) {
-                        ForEach(PressMode.allCases) { m in Text(m.title).tag(m) }
+                        Text(PressMode.hold.title).tag(PressMode.hold)
+                        Text(PressMode.repeatWhile.title).tag(PressMode.repeatWhile)
                     }
                     .labelsHidden()
                     .frame(width: 250)
                 }
             }
 
-            if action.type.supportsMode {
+            if action.type.supportsMode && action.type != .nothing {
                 Text(modeHint)
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -410,6 +421,7 @@ struct MouseTab: View {
                 GroupBox(label: Text("Тумблеры и повторы")) {
                     VStack(alignment: .leading, spacing: 8) {
                         slider("Порог положений «мин/макс»", $engine.config.mouse.zoneThreshold, 0.15...0.8, "±%.2f")
+                        slider("Сколько держать для «удержания»", $engine.config.mouse.longPressTime, 0.15...1.5, "%.2f с")
                         slider("Задержка перед повтором", $engine.config.mouse.repeatDelay, 0...1.5, "%.2f с")
                         slider("Интервал повтора", $engine.config.mouse.repeatInterval, 0.02...1, "%.2f с")
                     }
@@ -544,9 +556,9 @@ struct HelpTab: View {
                 }
                 Group {
                     Text("Режимы нажатия").font(.title3).bold().padding(.top, 6)
-                    Text("• Один раз при включении — действие срабатывает, когда тумблер/кнопка переходит в это положение.")
-                    Text("• Удерживать, пока держу кнопку (по умолчанию) — например, левая кнопка мыши зажата, пока вы держите кнопку на пульте: можно перетаскивать окна и файлы. Клавиши при долгом удержании повторяются, как на клавиатуре.")
-                    Text("• Повторять, пока активно — автокликер / автоповтор клавиши.")
+                    Text("• 👆 Короткое нажатие — срабатывает один раз (например, щелчок левой кнопкой).")
+                    Text("• ✊ Удержание — действует, пока вы не отпустите кнопку (например, левая кнопка мыши зажата — можно перетаскивать). Клавиши при этом повторяются, как на клавиатуре. Вместо «удерживать» можно выбрать «повторять» — автокликер.")
+                    Text("• Если заданы оба — быстрое нажатие запускает короткое действие, долгое — удержание. Время задаётся на вкладке «Мышь».")
                 }
                 Group {
                     Text("Полезные примеры").font(.title3).bold().padding(.top, 6)
